@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using Newtonsoft.Json;
 
 namespace SafeDeposit
 {
@@ -9,18 +11,29 @@ namespace SafeDeposit
         Locked,
         ClosedUnlocked
     }
-
+    [JsonObject]
     class Safe
     {
+        [JsonProperty]
         private int[] KeyCode { get; set; } = new int[4] { 1, 2, 3, 4 };
         private SafeDoor safeDoor = SafeDoor.ClosedUnlocked;
+        [JsonIgnore]
         public int LastKey { get; set; }
+        [JsonIgnore]
+        readonly string DestPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Safe.txt");
+
+
+
 
         private readonly string[] allKeys = new string[] { "r", "R", "c", "C", "o", "O", "l", "L" };
 
 
         public Safe()
         {
+            if (File.Exists(DestPath))
+            {
+                LoadFile();
+            } else { SerializeSafe(); }
             ReportStatus();
             DisplayMenu();
         }
@@ -141,6 +154,7 @@ namespace SafeDeposit
                         Convert.ToInt32(char.GetNumericValue(newCode[1])),
                         Convert.ToInt32(char.GetNumericValue(newCode[2])),
                         Convert.ToInt32(char.GetNumericValue(newCode[3]))};
+                        SerializeSafe();
                         return "New PIN Set!";
                     }
 
@@ -148,6 +162,17 @@ namespace SafeDeposit
 
             } while (!validCode);
             return "";
+        }
+
+        private void SerializeSafe()
+        {
+            string json = JsonConvert.SerializeObject(this);
+            File.WriteAllText(DestPath, json);
+        }
+
+        private void LoadFile()
+        {
+            JsonConvert.PopulateObject(File.ReadAllText(DestPath), this);
         }
 
         private string CloseDoor()

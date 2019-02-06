@@ -1,3 +1,4 @@
+using System.IO;
 // Safe Deposit Simulation - By Ben Chaimowicz
 
 namespace SafeDeposit
@@ -6,7 +7,7 @@ namespace SafeDeposit
     {
         static void Main(string[] args)
         {
-            Safe safe = new Safe();           
+            Safe safe = new Safe();
         }
     }
 }
